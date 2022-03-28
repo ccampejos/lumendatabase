@@ -19,7 +19,7 @@ class SearchController < ApplicationController
 
   def index
     if request.format.html? && current_user.nil? && !Rails.env.test?
-      permitted = false
+      permitted = true
 
       if session[:captcha_permission]
         time_permission = session[:captcha_permission]

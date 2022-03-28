@@ -15,6 +15,22 @@ class Url
     self.instance_variable_set("@#{index}", value)
   end
 
+  def parsed
+    @parsed_url ||= Addressable::URI.parse(url)
+  end
+
+  def host
+    parsed.host
+  end
+
+  def domain
+    parsed.domain
+  end
+
+  def registered_name
+    PublicSuffix.parse(domain, ignore_private: true).sld
+  end
+
   def url=(value)
     str_val = value.to_s
     @url = str_val

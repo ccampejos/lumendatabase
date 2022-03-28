@@ -55,10 +55,16 @@ module Searchability
           indexes :works do
             indexes :description, copy_to: 'preferred_search'
             indexes :infringing_urls do
-              indexes :url, copy_to: 'base_search'
+              indexes :url, type: 'keyword', copy_to: 'base_search'
+              indexes :host, type: 'keyword', copy_to: 'base_search'
+              indexes :domain, type: 'keyword', copy_to: 'base_search'
+              indexes :registered_name, type: 'keyword', copy_to: 'base_search'
             end
             indexes :copyrighted_urls do
-              indexes :url, copy_to: 'base_search'
+              indexes :url, type: 'keyword', copy_to: 'base_search'
+              indexes :host, type: 'keyword', copy_to: 'base_search'
+              indexes :domain, type: 'keyword', copy_to: 'base_search'
+              indexes :registered_name, type: 'keyword', copy_to: 'base_search'
             end
           end
           indexes :entities_country_codes, type: 'keyword'
@@ -116,8 +122,18 @@ module Searchability
         out['works'] = works.map do |work|
           {
             description: work.description,
-            infringing_urls: work.infringing_urls.map { |iurl| { url: iurl.url } },
-            copyrighted_urls: work.copyrighted_urls.map { |curl| { url: curl.url } }
+            infringing_urls: work.infringing_urls.map { |iurl| {
+              url: iurl.url,
+              host: iurl.host,
+              domain: iurl.domain,
+              registered_name: iurl.registered_name
+            } },
+            copyrighted_urls: work.copyrighted_urls.map { |curl| {
+              url: curl.url,
+              host: curl.host,
+              domain: curl.domain,
+              registered_name: curl.registered_name
+            } }
           }
         end
         out['entities_country_codes'] = entities_country_codes

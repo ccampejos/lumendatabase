@@ -29,6 +29,7 @@ gem 'oink'
 # Pinned because the next step is migrating to ActiveStorage.
 gem 'paperclip', '~> 5'
 gem 'pg', '~> 1.1.4'
+gem 'public_suffix'
 gem 'rack'
 gem 'rack-attack'
 # The ActiveSupport::Notifications default causes rails to hang on startup, so
