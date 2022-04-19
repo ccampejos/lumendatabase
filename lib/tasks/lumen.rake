@@ -205,6 +205,7 @@ namespace :lumen do
     begin
       batch_size = (ENV['BATCH_SIZE'] || 100).to_i
       [Notice, Entity].each do |klass|
+        pbar = ProgressBar.create(total: klass.get_approximate_count, format: "%a; %e; %c of %C (%P%); %R/sec", smoothing: 0.0)
         klass.__elasticsearch__.create_index! force: true
         count = 0
         klass.find_in_batches(batch_size: batch_size) do |instances|
@@ -212,10 +213,11 @@ namespace :lumen do
           instances.each do |instance|
             instance.__elasticsearch__.index_document
             count += 1
-            puts '.'
+            pbar.increment
           end
-          loggy.info "#{count} #{klass} instances indexed at #{Time.now.to_i}"
+          #loggy.info "#{count} #{klass} instances indexed at #{Time.now.to_i}"
         end
+        pbar.stop
       end
       ReindexRun.sweep_search_result_caches
     rescue => e

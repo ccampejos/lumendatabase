@@ -16,7 +16,11 @@ class Url
   end
 
   def parsed
-    @parsed_url ||= Addressable::URI.parse(url)
+    begin
+      @parsed_url ||= Addressable::URI.parse(url)
+    rescue
+      Addressable::URI.new()
+    end
   end
 
   def host
@@ -28,7 +32,11 @@ class Url
   end
 
   def registered_name
-    PublicSuffix.parse(domain, ignore_private: true).sld
+    begin
+			PublicSuffix.parse(domain, ignore_private: true).sld
+    rescue
+      nil
+    end
   end
 
   def url=(value)

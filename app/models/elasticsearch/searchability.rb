@@ -52,20 +52,20 @@ module Searchability
           indexes :topics do
             indexes :name, copy_to: 'base_search'
           end
+		      indexes :infringing do
+    	      indexes :host, type: 'keyword', copy_to: 'base_search'
+            indexes :domain, type: 'keyword', copy_to: 'base_search'
+            indexes :registered_name, type: 'keyword', copy_to: 'base_search'
+          end
+          indexes :copyrighted do
+    	      indexes :host, type: 'keyword', copy_to: 'base_search'
+            indexes :domain, type: 'keyword', copy_to: 'base_search'
+            indexes :registered_name, type: 'keyword', copy_to: 'base_search'
+          end
           indexes :works do
             indexes :description, copy_to: 'preferred_search'
-            indexes :infringing_urls do
-              indexes :url, type: 'keyword', copy_to: 'base_search'
-              indexes :host, type: 'keyword', copy_to: 'base_search'
-              indexes :domain, type: 'keyword', copy_to: 'base_search'
-              indexes :registered_name, type: 'keyword', copy_to: 'base_search'
-            end
-            indexes :copyrighted_urls do
-              indexes :url, type: 'keyword', copy_to: 'base_search'
-              indexes :host, type: 'keyword', copy_to: 'base_search'
-              indexes :domain, type: 'keyword', copy_to: 'base_search'
-              indexes :registered_name, type: 'keyword', copy_to: 'base_search'
-            end
+	          indexes :infringing_urls, type: 'keyword', copy_to: 'base_search'
+            indexes :copyrighted_urls, type: 'keyword', copy_to: 'base_search'
           end
           indexes :entities_country_codes, type: 'keyword'
 
@@ -119,21 +119,21 @@ module Searchability
         out['topics'] = topics.map do |topic|
           { id: topic[:id], name: topic[:name] }
         end
+        out['infringing'] = {
+          domain: works.map{|w| w.infringing_urls.map { |iurl| iurl.domain }}.flatten.uniq,
+          host: works.map{|w| w.infringing_urls.map { |iurl| iurl.host }}.flatten.uniq,
+          registered_name: works.map{|w| w.infringing_urls.map { |iurl| iurl.registered_name }}.flatten.uniq
+        }
+        out['copyrighted'] = {
+          domain: works.map{|w| w.copyrighted_urls.map { |iurl| iurl.domain }}.flatten.uniq,
+          host: works.map{|w| w.copyrighted_urls.map { |iurl| iurl.host }}.flatten.uniq,
+          registered_name: works.map{|w| w.copyrighted_urls.map { |iurl| iurl.registered_name }}.flatten.uniq
+        }
         out['works'] = works.map do |work|
           {
             description: work.description,
-            infringing_urls: work.infringing_urls.map { |iurl| {
-              url: iurl.url,
-              host: iurl.host,
-              domain: iurl.domain,
-              registered_name: iurl.registered_name
-            } },
-            copyrighted_urls: work.copyrighted_urls.map { |curl| {
-              url: curl.url,
-              host: curl.host,
-              domain: curl.domain,
-              registered_name: curl.registered_name
-            } }
+            infringing_urls: work.infringing_urls.map { |iurl| iurl.url }.uniq,
+            copyrighted_urls: work.copyrighted_urls.map { |curl| curl.url }.uniq,
           }
         end
         out['entities_country_codes'] = entities_country_codes
