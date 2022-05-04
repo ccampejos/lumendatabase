@@ -202,27 +202,29 @@ namespace :lumen do
   task recreate_elasticsearch_index: :environment do
     loggy = Loggy.new('rake lumen:recreate_elasticsearch_index', true)
 
-    begin
-      batch_size = (ENV['BATCH_SIZE'] || 100).to_i
-      [Notice, Entity].each do |klass|
-        pbar = ProgressBar.create(total: klass.get_approximate_count, format: "%a; %e; %c of %C (%P%); %R/sec", smoothing: 0.0)
-        klass.__elasticsearch__.create_index! force: true
-        count = 0
-        klass.find_in_batches(batch_size: batch_size) do |instances|
-          GC.start
-          instances.each do |instance|
-            instance.__elasticsearch__.index_document
-            count += 1
-            pbar.increment
-          end
-          #loggy.info "#{count} #{klass} instances indexed at #{Time.now.to_i}"
-        end
-        pbar.stop
+    batch_size = (ENV['BATCH_SIZE'] || 100).to_i
+    [Notice, Entity].each do |klass|
+      pbar = ProgressBar.create(total: klass.get_approximate_count,
+                                format: "%a; %e; %c of %C (%P%); %R/sec",
+                                smoothing: 0.0)
+      klass.__elasticsearch__.create_index! force: true
+      last_thread = nil
+      klass.find_in_batches(batch_size: batch_size, order: :desc) do |batch|
+        params = {
+              index: klass.index_name,
+              type: klass.document_type,
+              body: Parallel.map(batch, in_ractors: 10) {|m| klass.__elasticsearch__.__transform.call(m)}
+        }
+
+        # Throw the actual sending in Elasticsearch in a thread so we 
+        # don't have to wait for it.
+        last_thread = Thread.new {klass.__elasticsearch__.client.bulk params}
+        batch_size.times { pbar.increment }
       end
-      ReindexRun.sweep_search_result_caches
-    rescue => e
-      loggy.error "Reindexing did not succeed because: #{e.inspect}"
+      last_thread.join
+      pbar.stop
     end
+    ReindexRun.sweep_search_result_caches
   end
 
   desc 'Recreate elasticsearch index memory efficiently'

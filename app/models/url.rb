@@ -19,7 +19,18 @@ class Url
     begin
       @parsed_url ||= Addressable::URI.parse(url)
     rescue
-      Addressable::URI.new()
+      Addressable::URI.new
+    end
+  end
+
+  def parsed_host
+    # Addressable::URI#domain uses PublicSuffix under the covers,
+    # so we get a tiny performance boost by preparsing and then using
+    # this for both #domain and #registered_name
+    begin
+      PublicSuffix.parse(host, ignore_private: true)
+    rescue
+      PublicSuffix::Domain.new
     end
   end
 
@@ -28,15 +39,11 @@ class Url
   end
 
   def domain
-    parsed.domain
+    parsed_host.domain
   end
 
   def registered_name
-    begin
-			PublicSuffix.parse(domain, ignore_private: true).sld
-    rescue
-      nil
-    end
+    parsed_host.sld
   end
 
   def url=(value)
