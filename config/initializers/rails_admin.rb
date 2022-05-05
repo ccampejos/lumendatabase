@@ -20,9 +20,11 @@ RailsAdmin.config do |config|
 
   config.authorize_with :cancancan
 
-  config.audit_with :history, 'User'
-  config.audit_with :history, 'Role'
-  config.audit_with :history, 'Notice'
+  config.asset_source = :sprockets
+
+  config.audit_with :paper_trail, 'User', 'PaperTrail::Version'
+  config.audit_with :paper_trail, 'Role', 'PaperTrail::Version'
+  config.audit_with :paper_trail, 'Notice', 'PaperTrail::Version'
 
   boolean_true_icon = '<span class="label label-success">&#x2713;</span>'.html_safe
   boolean_false_icon = '<span class="label label-danger">&#x2718;</span>'.html_safe
@@ -57,9 +59,11 @@ RailsAdmin.config do |config|
     top_notices_token_urls
   end
 
-  ['Notice', Notice::TYPES].flatten.each do |notice_type|
-    config.audit_with :history, notice_type
+  def notice_token_urls_count_links(bindings, perm = false)
+    bindings[:object].token_urls.where(valid_forever: perm).count
+  end
 
+  ['Notice', Notice::TYPES].flatten.each do |notice_type|
     config.model notice_type do
       label { abstract_model.model.label }
 
@@ -340,6 +344,32 @@ RailsAdmin.config do |config|
     end
   end
 
+  def token_url_config
+    list do
+      field :email
+      field :user
+      field :notice
+      field :expiration_date
+      field(:valid_forever) { label 'Permenent' }
+      field :views
+      field :created_at
+      field :ip
+    end
+
+    edit do
+      field :email do
+        required false
+      end
+      field :user
+      field :notice do
+        required true
+      end
+      field :expiration_date
+      field(:valid_forever) { label 'Permenent' }
+      field :documents_notification
+    end
+  end
+
   config.model 'TokenUrl' do
     token_url_config
   end
@@ -510,35 +540,11 @@ RailsAdmin.config do |config|
   config.model 'Comfy::Cms::Translation' do
     visible false
   end
+  config.model 'PaperTrail::Version' do
+    visible false
+  end
+  config.model 'PaperTrail::VersionAssociation' do
+    visible false
+  end
   # == END ============================================================
-
-  def notice_token_urls_count_links(bindings, perm = false)
-    bindings[:object].token_urls.where(valid_forever: perm).count
-  end
-
-  def token_url_config
-    list do
-      field :email
-      field :user
-      field :notice
-      field :expiration_date
-      field(:valid_forever) { label 'Permenent' }
-      field :views
-      field :created_at
-      field :ip
-    end
-
-    edit do
-      field :email do
-        required false
-      end
-      field :user
-      field :notice do
-        required true
-      end
-      field :expiration_date
-      field(:valid_forever) { label 'Permenent' }
-      field :documents_notification
-    end
-  end
 end

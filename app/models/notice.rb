@@ -128,6 +128,8 @@ class Notice < ApplicationRecord
 
   define_elasticsearch_mapping
 
+  has_paper_trail
+
   # == Validations ==========================================================
   validates_inclusion_of :action_taken, in: VALID_ACTIONS, allow_blank: true
   validates_inclusion_of :language, in: Language.codes, allow_blank: true

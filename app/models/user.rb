@@ -15,6 +15,7 @@ class User < ApplicationRecord
          :recoverable,           # New users are given a temp password to reset
          :validatable            # Ensures confirmation of Password on reset
   accepts_nested_attributes_for :entity
+  has_paper_trail
 
   # == Callbacks ============================================================
   before_save :ensure_authentication_token,
