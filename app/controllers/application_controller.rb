@@ -84,10 +84,7 @@ class ApplicationController < ActionController::Base
   end
 
   def resource_not_found(exception = false)
-    logger404s = LogStashLogger.new(
-      type: :file,
-      path: "log/logstash_#{Rails.env}_404s.log"
-    )
+    logger404s = LumenLogger.init(path: "log/#{Rails.env}_404s.log")
     logger404s.error(exception) if exception
 
     set_default_format
