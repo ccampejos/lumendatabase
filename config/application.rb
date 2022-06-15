@@ -5,6 +5,8 @@ require_relative '../lib/handle_bad_encoding_parameters'
 require 'rails/all'
 require 'active_storage/engine'
 
+require_relative '../lib/lumen'
+
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
@@ -99,5 +101,7 @@ module Chill
     config.default_sender = ENV['DEFAULT_SENDER'] || 'no-reply@example.com'
     config.return_path = ENV['RETURN_PATH'] || 'user@example.com'
     config.site_host = ENV['SITE_HOST'] || 'example.com'
+
+    config.logger = Lumen::LOGGER
   end
 end
