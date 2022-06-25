@@ -1,6 +1,39 @@
-Lumen API
-=========
-The Lumen API documentation now lives on our GitHub Wiki:
-
-https://github.com/berkmancenter/lumendatabase/wiki/Lumen-API-documentation
-
+<code>
+{
+  "dmca":{
+    "id":1,
+    "title":"Lion King on YouTube",
+    "body":null,
+    "date_sent":"2013-06-04T19:23:12Z",
+    "date_received":"2013-06-05T20:31:44Z",
+    "topics":[
+      "Anticircumvention (DMCA)",
+      "Bookmarks",
+      "Lumen"
+    ],
+    "tags": [
+      "tag_1",
+      "tag_2"
+    ],
+    "jurisdictions": [
+      "US",
+      "CA"
+    ],
+    "action_taken": "Partial",
+    "sender_name": "Joe Lawyer",
+    "recipient_name": "Google, Inc.",
+    "works": [
+      {
+        "description": "Lion King Video",
+        "copyrighted_urls": [
+          { "url": "https://www.youtube.com/watch?v=SKz3xvq0nsk" },
+          { "url": "https://www.youtube.com/watch?v=SKz3xvq0nsk" }
+        ],
+        "infringing_urls": [
+          { "url": "https://www.youtube.com/watch?v=TR08sX5d_Bk" },
+          { "url": "https://www.youtube.com/watch?v=TR08sX5d_Bk" },
+                 ]
+      }
+    ]
+  }
+}
